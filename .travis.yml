@@ -1,0 +1,19 @@
+language: go
+
+go:
+- master
+
+os:
+  - linux
+
+dist: bionic
+
+# before_install:
+#   - sudo apt-get install -y ...
+# addons:
+#   apt:
+#     update: true
+
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)
