@@ -31,7 +31,7 @@ func (ts *TypedSource) GetInt(property string) (int, error) {
 
 	i, err := strconv.Atoi(value)
 	if err != nil {
-		return 0, newErrValueFormat(property, value, "int")
+		return 0, newErrValueFormat(property, value, IntDesiredFormat)
 	}
 	return i, nil
 }

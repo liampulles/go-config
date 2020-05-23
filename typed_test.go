@@ -23,14 +23,14 @@ func TestTypedSource_GetInt_GivenFixture_ShouldReturnAsExpected(t *testing.T) {
 		// Property with set value -> Return set value
 		{
 			"property",
-			ptr("1"),
+			strPtr("1"),
 			1,
 		},
 
 		// Property with negative set value -> Return set value
 		{
 			"property",
-			ptr("-1"),
+			strPtr("-1"),
 			-1,
 		},
 	}
@@ -70,7 +70,7 @@ func TestTypedSource_GetInt_GivenFaultyData_ShouldReturnError(t *testing.T) {
 		// Empty property
 		{
 			"",
-			ptr("1"),
+			strPtr("1"),
 			ErrEmptyProperty,
 		},
 
@@ -86,11 +86,11 @@ func TestTypedSource_GetInt_GivenFaultyData_ShouldReturnError(t *testing.T) {
 		// Non-int property
 		{
 			"property",
-			ptr("not an int"),
+			strPtr("not an int"),
 			&ErrValueFormat{
 				Property:          "property",
 				ValueString:       "not an int",
-				DesiredFormatDesc: "int",
+				DesiredFormatDesc: IntDesiredFormat,
 			},
 		},
 	}

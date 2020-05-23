@@ -38,6 +38,9 @@ type ErrValueFormat struct {
 // Compile check to make sure ErrValueFormat implements error
 var _ error = &ErrValueFormat{}
 
+// IntDesiredFormat is a ErrValueFormat.DesiredFormatDesc variant
+const IntDesiredFormat = "int"
+
 // NewErrValueFormat constructor
 func newErrValueFormat(property string, valueString string, desiredFormatDesc string) *ErrValueFormat {
 	return &ErrValueFormat{

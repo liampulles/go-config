@@ -17,7 +17,7 @@ func testGetStringPassingCases(constructor sourceConstructor, t *testing.T) {
 		// Property with set value -> Return set value
 		{
 			"property",
-			ptr("value"),
+			strPtr("value"),
 			"value",
 		},
 	}
@@ -57,7 +57,7 @@ func testGetStringFailingCases(constructor sourceConstructor, t *testing.T) {
 		// Empty property
 		{
 			"",
-			ptr("value"),
+			strPtr("value"),
 			ErrEmptyProperty,
 		},
 
@@ -98,6 +98,10 @@ func testGetStringFailingCases(constructor sourceConstructor, t *testing.T) {
 	}
 }
 
-func ptr(val string) *string {
+func strPtr(val string) *string {
+	return &val
+}
+
+func intPtr(val int) *int {
 	return &val
 }
