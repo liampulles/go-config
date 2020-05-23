@@ -17,10 +17,6 @@
   </a>
 </p>
 
-## Usage
-
-TODO: Expand this
-
 ## 🐉 Contributing
 
 Please submit an issue with your proposal.
