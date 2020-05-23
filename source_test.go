@@ -1,15 +1,13 @@
-package config_test
+package config
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/liampulles/go-config"
 )
 
-type sourceConstructor func(property string, value *string) config.Source
+type sourceConstructor func(property string, value *string) Source
 
-func testGetString_PassingCases(constructor sourceConstructor, t *testing.T) {
+func testGetStringPassingCases(constructor sourceConstructor, t *testing.T) {
 	// Setup fixture
 	var tests = []struct {
 		propertyFixture string
@@ -49,7 +47,7 @@ func testGetString_PassingCases(constructor sourceConstructor, t *testing.T) {
 	}
 }
 
-func testGetString_FailingCases(constructor sourceConstructor, t *testing.T) {
+func testGetStringFailingCases(constructor sourceConstructor, t *testing.T) {
 	// Setup fixture
 	var tests = []struct {
 		propertyFixture string
@@ -60,14 +58,14 @@ func testGetString_FailingCases(constructor sourceConstructor, t *testing.T) {
 		{
 			"",
 			ptr("value"),
-			config.ErrEmptyProperty,
+			ErrEmptyProperty,
 		},
 
 		// Unset property
 		{
 			"property",
 			nil,
-			&config.ErrPropertyNotSet{
+			&ErrPropertyNotSet{
 				Property: "property",
 			},
 		},

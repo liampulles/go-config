@@ -1,18 +1,16 @@
-package config_test
+package config
 
 import (
 	"fmt"
 	"testing"
-
-	"github.com/liampulles/go-config"
 )
 
 func TestTypedSource_GetString_GivenFixture_ShouldReturnAsExpected(t *testing.T) {
-	testGetString_PassingCases(typedSourceConstructorAsSource, t)
+	testGetStringPassingCases(typedSourceConstructorAsSource, t)
 }
 
 func TestTypedSource_GetString_GivenFaultyData_ShouldReturnError(t *testing.T) {
-	testGetString_FailingCases(typedSourceConstructorAsSource, t)
+	testGetStringFailingCases(typedSourceConstructorAsSource, t)
 }
 
 func TestTypedSource_GetInt_GivenFixture_ShouldReturnAsExpected(t *testing.T) {
@@ -73,14 +71,14 @@ func TestTypedSource_GetInt_GivenFaultyData_ShouldReturnError(t *testing.T) {
 		{
 			"",
 			ptr("1"),
-			config.ErrEmptyProperty,
+			ErrEmptyProperty,
 		},
 
 		// Unset property
 		{
 			"property",
 			nil,
-			&config.ErrPropertyNotSet{
+			&ErrPropertyNotSet{
 				Property: "property",
 			},
 		},
@@ -89,7 +87,7 @@ func TestTypedSource_GetInt_GivenFaultyData_ShouldReturnError(t *testing.T) {
 		{
 			"property",
 			ptr("not an int"),
-			&config.ErrValueFormat{
+			&ErrValueFormat{
 				Property:          "property",
 				ValueString:       "not an int",
 				DesiredFormatDesc: "int",
@@ -124,10 +122,10 @@ func TestTypedSource_GetInt_GivenFaultyData_ShouldReturnError(t *testing.T) {
 	}
 }
 
-func typedSourceConstructorAsSource(property string, val *string) config.Source {
+func typedSourceConstructorAsSource(property string, val *string) Source {
 	return typedSourceConstructor(property, val)
 }
 
-func typedSourceConstructor(property string, val *string) *config.TypedSource {
-	return config.NewTypedSource(mapSourceConstructor(property, val))
+func typedSourceConstructor(property string, val *string) *TypedSource {
+	return NewTypedSource(mapSourceConstructor(property, val))
 }

@@ -17,10 +17,10 @@
   </a>
 </p>
 
-## 🐉 Contributing
+## Contributing
 
 Please submit an issue with your proposal.
 
-## 🦄 License
+## License
 
 See [LICENSE](LICENSE)

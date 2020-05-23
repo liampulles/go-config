@@ -1,25 +1,23 @@
-package config_test
+package config
 
 import (
 	"os"
 	"testing"
-
-	"github.com/liampulles/go-config"
 )
 
 func TestEnvSource_GetString_GivenInput_ShouldReturnAsExpected(t *testing.T) {
-	testGetString_PassingCases(envSourceConstructor, t)
+	testGetStringPassingCases(envSourceConstructor, t)
 }
 
 func TestEnvSource_GetString_GivenFaultyData_ShouldReturnError(t *testing.T) {
-	testGetString_FailingCases(envSourceConstructor, t)
+	testGetStringFailingCases(envSourceConstructor, t)
 }
 
-func envSourceConstructor(property string, val *string) config.Source {
+func envSourceConstructor(property string, val *string) Source {
 	if val == nil {
 		os.Unsetenv(property)
 	} else {
 		os.Setenv(property, *val)
 	}
-	return config.NewEnvSource()
+	return NewEnvSource()
 }
