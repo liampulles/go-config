@@ -1,233 +1,192 @@
 package config
 
 import (
-	"fmt"
-	"reflect"
 	"testing"
 )
 
-func TestLoadStringProperties_GivenSetProperties_ShouldMapWithoutError(t *testing.T) {
+func TestLoadProperties_GivenEmptyProperties_ShouldNotFail(t *testing.T) {
 	// Setup fixture
-	var tests = []struct {
-		setPropertiesFixture map[string]string
-		mappingFixture       map[string]*string
-		expected             map[string]*string
-	}{
-		// Empty case
-		{
-			map[string]string{},
-			map[string]*string{},
-			map[string]*string{},
-		},
-		// Empty mappings in -> Empty mappings out
-		{
-			map[string]string{"PROPERTY": "VALUE"},
-			map[string]*string{},
-			map[string]*string{},
-		},
-		// One property match
-		{
-			map[string]string{
-				"PROPERTY1": "VALUE1",
-				"PROPERTY2": "VALUE2",
-			},
-			map[string]*string{"PROPERTY1": strPtr("")},
-			map[string]*string{"PROPERTY1": strPtr("VALUE1")},
-		},
-		// A few property matches
-		{
-			map[string]string{
-				"PROPERTY1": "VALUE1",
-				"PROPERTY2": "VALUE2",
-				"PROPERTY3": "VALUE3",
-			},
-			map[string]*string{
-				"PROPERTY1": strPtr(""),
-				"PROPERTY2": strPtr(""),
-			},
-			map[string]*string{
-				"PROPERTY1": strPtr("VALUE1"),
-				"PROPERTY2": strPtr("VALUE2"),
-			},
-		},
-	}
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+	}))
 
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
-			// Setup fixture
-			sourceFixture := MapSource(test.setPropertiesFixture)
+	// Exercise SUT
+	err := LoadProperties(sourceFixture)
 
-			// Exercise SUT
-			err := LoadStringProperties(sourceFixture, test.mappingFixture)
-
-			// Verify result
-			if err != nil {
-				t.Errorf("Unexpected error:\n%#v", err)
-			}
-			if !reflect.DeepEqual(test.mappingFixture, test.expected) {
-				t.Errorf("Unexpected Result.\nActual: %#v\nExpected: %#v", test.mappingFixture, test.expected)
-			}
-		})
+	// Verify Results
+	if err != nil {
+		t.Errorf("Unexpected error: %#v", err)
 	}
 }
 
-func TestLoadStringProperties_GivenUnsetOrBadProperties_ShouldReturnError(t *testing.T) {
+func TestLoadProperties_GivenUnsetStringPropertyForRequiredMapping_ShouldFail(t *testing.T) {
 	// Setup fixture
-	var tests = []struct {
-		setPropertiesFixture map[string]string
-		mappingFixture       map[string]*string
-		expectedErr          error
-	}{
-		// Empty property
-		{
-			map[string]string{"PROPERTY": "VALUE"},
-			map[string]*string{"": strPtr("something")},
-			ErrEmptyProperty,
-		},
-		// Unset property
-		{
-			map[string]string{
-				"PROPERTY1": "VALUE1",
-				"PROPERTY2": "VALUE2",
-			},
-			map[string]*string{
-				"PROPERTY1":             strPtr(""),
-				"NON_EXISTENT_PROPERTY": strPtr(""),
-			},
-			&ErrPropertyNotSet{Property: "NON_EXISTENT_PROPERTY"},
-		},
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+	}))
+	actual := "prev"
+	nonExistantProperty := StrProp("DOES NOT EXIST", &actual, true)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err == nil {
+		t.Errorf("Expected error but none returned")
 	}
-
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
-			// Setup fixture
-			sourceFixture := MapSource(test.setPropertiesFixture)
-
-			// Exercise SUT
-			err := LoadStringProperties(sourceFixture, test.mappingFixture)
-
-			// Verify result
-			if err == nil {
-				t.Errorf("Expected error, but none was returned")
-			} else if err.Error() != test.expectedErr.Error() {
-				t.Errorf("Unexpected Result.\nActual: %v\nExpected: %v", err, test.expectedErr)
-			}
-		})
+	if actual != "prev" {
+		t.Errorf("Expected actual to not be mapped, but is %s", actual)
 	}
 }
 
-func TestLoadIntProperties_GivenSetProperties_ShouldMapWithoutError(t *testing.T) {
+func TestLoadProperties_GivenUnsetIntPropertyForRequiredMapping_ShouldFail(t *testing.T) {
 	// Setup fixture
-	var tests = []struct {
-		setPropertiesFixture map[string]string
-		mappingFixture       map[string]*int
-		expected             map[string]*int
-	}{
-		// Empty case
-		{
-			map[string]string{},
-			map[string]*int{},
-			map[string]*int{},
-		},
-		// Empty mappings in -> Empty mappings out
-		{
-			map[string]string{"PROPERTY": "1"},
-			map[string]*int{},
-			map[string]*int{},
-		},
-		// One property match
-		{
-			map[string]string{
-				"PROPERTY1": "1",
-				"PROPERTY2": "2",
-			},
-			map[string]*int{"PROPERTY1": intPtr(0)},
-			map[string]*int{"PROPERTY1": intPtr(1)},
-		},
-		// A few property matches
-		{
-			map[string]string{
-				"PROPERTY1": "1",
-				"PROPERTY2": "2",
-				"PROPERTY3": "3",
-			},
-			map[string]*int{
-				"PROPERTY1": intPtr(0),
-				"PROPERTY2": intPtr(0),
-			},
-			map[string]*int{
-				"PROPERTY1": intPtr(1),
-				"PROPERTY2": intPtr(2),
-			},
-		},
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "1",
+	}))
+	actual := -1
+	nonExistantProperty := IntProp("DOES NOT EXIST", &actual, true)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err == nil {
+		t.Errorf("Expected error but none returned")
 	}
-
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
-			// Setup fixture
-			sourceFixture := NewTypedSource(MapSource(test.setPropertiesFixture))
-
-			// Exercise SUT
-			err := LoadIntProperties(sourceFixture, test.mappingFixture)
-
-			// Verify result
-			if err != nil {
-				t.Errorf("Unexpected error:\n%#v", err)
-			}
-			if !reflect.DeepEqual(test.mappingFixture, test.expected) {
-				t.Errorf("Unexpected Result.\nActual: %#v\nExpected: %#v", test.mappingFixture, test.expected)
-			}
-		})
+	if actual != -1 {
+		t.Errorf("Expected actual to not be mapped, but is %d", actual)
 	}
 }
 
-func TestLoadIntProperties_GivenUnsetOrBadProperties_ShouldReturnError(t *testing.T) {
+func TestLoadProperties_GivenUnsetStringPropertyForNonRequiredMapping_ShouldPass(t *testing.T) {
 	// Setup fixture
-	var tests = []struct {
-		setPropertiesFixture map[string]string
-		mappingFixture       map[string]*int
-		expectedErr          error
-	}{
-		// Empty property
-		{
-			map[string]string{"PROPERTY": "1"},
-			map[string]*int{"": intPtr(0)},
-			ErrEmptyProperty,
-		},
-		// Unset property
-		{
-			map[string]string{
-				"PROPERTY1": "1",
-				"PROPERTY2": "2",
-			},
-			map[string]*int{
-				"PROPERTY1":             intPtr(0),
-				"NON_EXISTENT_PROPERTY": intPtr(0),
-			},
-			&ErrPropertyNotSet{Property: "NON_EXISTENT_PROPERTY"},
-		},
-		// Value in wrong format
-		{
-			map[string]string{"PROPERTY": "VALUE"},
-			map[string]*int{"PROPERTY": intPtr(0)},
-			&ErrValueFormat{Property: "PROPERTY", ValueString: "VALUE", DesiredFormatDesc: IntDesiredFormat},
-		},
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+	}))
+	actual := "prev"
+	nonExistantProperty := StrProp("DOES NOT EXIST", &actual, false)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err != nil {
+		t.Errorf("Unexpected error: %#v", err)
 	}
-
-	for i, test := range tests {
-		t.Run(fmt.Sprintf("[%d]", i), func(t *testing.T) {
-			// Setup fixture
-			sourceFixture := NewTypedSource(MapSource(test.setPropertiesFixture))
-
-			// Exercise SUT
-			err := LoadIntProperties(sourceFixture, test.mappingFixture)
-
-			// Verify result
-			if err == nil {
-				t.Errorf("Expected error, but none was returned")
-			} else if err.Error() != test.expectedErr.Error() {
-				t.Errorf("Unexpected Result.\nActual: %v\nExpected: %v", err, test.expectedErr)
-			}
-		})
+	if actual != "prev" {
+		t.Errorf("Expected actual to not be mapped, but is %s", actual)
 	}
+}
+
+func TestLoadProperties_GivenUnsetIntPropertyForNonRequiredMapping_ShouldPass(t *testing.T) {
+	// Setup fixture
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+	}))
+	actual := -1
+	nonExistantProperty := IntProp("DOES NOT EXIST", &actual, false)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err != nil {
+		t.Errorf("Unexpected error: %#v", err)
+	}
+	if actual != -1 {
+		t.Errorf("Expected actual to not be mapped, but is %d", actual)
+	}
+}
+
+func TestLoadProperties_GivenEmptyStringProperty_ShouldFail(t *testing.T) {
+	// Setup fixture
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+	}))
+	actual := ""
+	nonExistantProperty := StrProp("", &actual, false)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err == nil {
+		t.Errorf("Expected error but none returned")
+	}
+	if actual != "" {
+		t.Errorf("Expected actual to not be mapped, but is %s", actual)
+	}
+}
+
+func TestLoadProperties_GivenEmptyIntProperty_ShouldFail(t *testing.T) {
+	// Setup fixture
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "1",
+	}))
+	actual := -1
+	nonExistantProperty := IntProp("", &actual, false)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, nonExistantProperty)
+
+	// Verify Results
+	if err == nil {
+		t.Errorf("Expected error but none returned")
+	}
+	if actual != -1 {
+		t.Errorf("Expected actual to not be mapped, but is %d", actual)
+	}
+}
+
+func TestLoadProperties_GivenUnknownPropertyType_ShouldFail(t *testing.T) {
+	// Setup fixture
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "1",
+	}))
+	expectedErr := "unknown property type *config.unknownProperty"
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, &unknownProperty{})
+
+	// Verify Results
+	if err == nil {
+		t.Errorf("Expected error but none returned")
+	} else if err.Error() != expectedErr {
+		t.Errorf("Unexpected error message\nActual: %s\nExpected: %s", err.Error(), expectedErr)
+	}
+}
+
+func TestLoadProperties_GivenSetValidProperties_ShouldNotFailAndShouldMap(t *testing.T) {
+	// Setup fixture
+	sourceFixture := NewTypedSource(MapSource(map[string]string{
+		"PROPERTY1": "VALUE1",
+		"PROPERTY2": "VALUE2",
+		"PROPERTY3": "3",
+	}))
+	actualStr := ""
+	strProp := StrProp("PROPERTY2", &actualStr, false)
+	actualInt := -1
+	intProp := IntProp("PROPERTY3", &actualInt, false)
+
+	// Exercise SUT
+	err := LoadProperties(sourceFixture, strProp, intProp)
+
+	// Verify Results
+	if err != nil {
+		t.Errorf("Unexpected error: %#v", err)
+	}
+	if actualStr != "VALUE2" {
+		t.Errorf("Unexpected strProp\nActual: %s\nExpected: %s", actualStr, "VALUE2")
+	}
+	if actualInt != 3 {
+		t.Errorf("Unexpected intProp\nActual: %d\nExpected: %d", actualInt, 3)
+	}
+}
+
+type unknownProperty struct {
+}
+
+func (up *unknownProperty) required() bool {
+	return false
 }

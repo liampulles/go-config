@@ -54,3 +54,23 @@ func newErrValueFormat(property string, valueString string, desiredFormatDesc st
 func (e *ErrValueFormat) Error() string {
 	return fmt.Sprintf("value of %s property can not be converted to %s (is %s)", e.Property, e.DesiredFormatDesc, e.ValueString)
 }
+
+// ErrUnknownPropertyType is returned when a property is not known
+type ErrUnknownPropertyType struct {
+	Type string
+}
+
+// NewErrUnknownPropertyType is a constructor
+func NewErrUnknownPropertyType(typ interface{}) *ErrUnknownPropertyType {
+	return &ErrUnknownPropertyType{
+		Type: fmt.Sprintf("%T", typ),
+	}
+}
+
+// Error implements the error interface
+func (e *ErrUnknownPropertyType) Error() string {
+	return fmt.Sprintf("unknown property type %s", e.Type)
+}
+
+// Compile check to make sure ErrUnknownPropertyType implements error
+var _ error = &ErrUnknownPropertyType{}
